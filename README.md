@@ -6,6 +6,7 @@ This is a sample app which lists all the trending repositories.
 - Install the required dependencies: npm install
 - start the app: npm start
 - The app should open in your default browser at http://localhost:3000/.
+- To run the app in local environment replace the 'domain' and 'clientId' with your values.
 
 ### Dependencies
 - ReactJS
