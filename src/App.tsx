@@ -13,9 +13,9 @@ const App = () => {
     <AuthWrapper>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<ProtectedRoute component={SharedLayout} />} >
+          <Route path="/" element={<SharedLayout />} >
             <Route index element={<PrivateRoute> <Home /> </PrivateRoute>} />
-            <Route path=":owner/:repoName" element={<PrivateRoute> <SingleRepo /> </PrivateRoute>} />
+            <Route path=":owner/:repoName" element={<ProtectedRoute component={SingleRepo} />} />
           </Route>
           <Route path="login" element={<Login />} />
           <Route path="*" element={<Error />} />
