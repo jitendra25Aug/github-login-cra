@@ -2,6 +2,9 @@ import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { Card, Filters } from ".";
 import { useFilterContext } from "../context/filter_context";
+import { IoCreateOutline } from "react-icons/io5";
+import { useAuth0 } from "@auth0/auth0-react";
+import { Navigate } from "react-router";
 
 /*
  * DISPLAYS THE LIST OF REPOSITORIES
@@ -9,6 +12,9 @@ import { useFilterContext } from "../context/filter_context";
 
 const Repos = () => {
     const { filtered_repository } = useFilterContext();
+    const { isAuthenticated, user } = useAuth0();
+
+    if (!(isAuthenticated && user)) { return <Navigate to='/login' />; }
 
     return (
         <section className='section'>
@@ -20,11 +26,11 @@ const Repos = () => {
                     <div className="card-body">
                         {filtered_repository &&
                             filtered_repository.map((repo: any) => {
-                                const { id, description, language, owner, name, stargazers_count, forks_count } = repo;
+                                const { id, description, language, owner, name, stargazers_count, forks_count, created_at } = repo;
                                 return (
                                     <article className="repo-row" key={id}>
                                         <h2>
-                                            <Link to={`/${owner.login}/${name}`} >
+                                            <Link to={`/repos/${name}`} >
                                                 <svg height="16" viewBox="0 0 16 16" width="16">
                                                     <path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8ZM5 12.25a.25.25 0 0 1 .25-.25h3.5a.25.25 0 0 1 .25.25v3.25a.25.25 0 0 1-.4.2l-1.45-1.087a.249.249 0 0 0-.3 0L5.4 15.7a.25.25 0 0 1-.4-.2Z"></path>
                                                 </svg>
@@ -51,6 +57,10 @@ const Repos = () => {
                                                     <path d="M5 5.372v.878c0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75v-.878a2.25 2.25 0 1 1 1.5 0v.878a2.25 2.25 0 0 1-2.25 2.25h-1.5v2.128a2.251 2.251 0 1 1-1.5 0V8.5h-1.5A2.25 2.25 0 0 1 3.5 6.25v-.878a2.25 2.25 0 1 1 1.5 0ZM5 3.25a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Zm6.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm-3 8.75a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Z"></path>
                                                 </svg>
                                                 {forks_count}
+                                            </span>)}
+                                            {(created_at && (created_at.trim()).length >= 0) && (<span className="inline-block">
+                                                <IoCreateOutline className="svg" />
+                                                {created_at.slice(0, 10)}
                                             </span>)}
                                         </div>
                                     </article>
@@ -101,6 +111,11 @@ svg{
     vertical-align: middle;
     fill: currentColor;
 }
+.svg{
+    width: 16px;
+    height: 16px;
+}
+
 
 p{
     width: 75%;
@@ -116,7 +131,7 @@ p{
     color: var(--color-fg-muted);
     .inline-block{
         display: inline-block;
-        margin-right: 16px;
+        margin-right: 1.5rem;
         margin-left: 0;
     }
     .repo-language-color{

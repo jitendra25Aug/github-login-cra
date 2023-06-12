@@ -1,6 +1,7 @@
+import { useAuth0 } from "@auth0/auth0-react";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { useParams } from "react-router";
+import { Navigate, useParams } from "react-router";
 import styled from "styled-components";
 import { Error } from ".";
 import { Card, Loading } from "../components";
@@ -10,26 +11,34 @@ import { Card, Loading } from "../components";
  */
 
 const SingleRepo = () => {
-    const { repoName, owner } = useParams();
-    const { repos } = useSelector((store: any) => store.userSlice);
+    const { repoName } = useParams();
+    const { repos, isLoading } = useSelector((store: any) => store.userSlice);
     const [currentRepo, setCurrentRepo] = useState<any>(null);
     const [isError, setIsError] = useState(false);
+    const { isAuthenticated, user } = useAuth0();
 
     useEffect(() => {
-        const currentRepo = repos.filter((repo: any) => repo.name === repoName);
-        if (currentRepo.length === 0) { setIsError(true); }
-        setCurrentRepo(currentRepo[0]);
-    }, [repos, repoName])
+        if (!isLoading && repos.length) {
+            const currentRepo = repos.filter((repo: any) => repo.name === repoName);
+            if (currentRepo.length === 0) { setIsError(true); }
+            setCurrentRepo(currentRepo[0]);
+        }
+    }, [repos, repoName, isLoading])
 
+    if (isLoading) { return <Loading /> }
     if (isError) { return <Error /> }
     if (!currentRepo) { return (<Loading />) }
+
+    if (!(isAuthenticated && user)) {
+        return <Navigate to='/login' />;
+    }
 
     return (
         <section className='section'>
             <Wrapper className='section-center'>
                 <Card>
                     <div className="card-header">
-                        <h3>{owner} / <span>{repoName}</span></h3>
+                        <h3>{currentRepo.owner.login} / <span>{repoName}</span></h3>
                     </div>
                     <div className="card-body">
                         <article className="repo-row">
@@ -59,6 +68,14 @@ const SingleRepo = () => {
                                         <span className="inline-block">
                                             <span className="span-heading">Forks: </span>
                                             <span>{currentRepo.forks_count}</span>
+                                        </span>
+                                    </p>
+                                )}
+                                {(currentRepo.created_at && (currentRepo.created_at.trim()).length >= 0) && (
+                                    <p>
+                                        <span className="inline-block">
+                                            <span className="span-heading">Created At: </span>
+                                            <span>{currentRepo.created_at.slice(0, 10)}</span>
                                         </span>
                                     </p>
                                 )}
